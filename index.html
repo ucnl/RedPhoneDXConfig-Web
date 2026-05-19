@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤿 RedPhone DX Config</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤿 RedPhone DX Config</h1>
+            <div class="header-controls">
+                <select id="langSelector" class="lang-select">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                </select>
+                <span id="connectionStatus" class="status-badge disconnected" data-i18n="status_disconnected">Отключено</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Панель подключения -->
+            <section class="panel connection-panel">
+                <h2 data-i18n="connection_title">Подключение</h2>
+                <div class="connection-info">
+                    <div class="info-row">
+                        <span class="label" data-i18n="device_type">Тип устройства:</span>
+                        <span id="deviceType" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label" data-i18n="serial_number">Серийный номер:</span>
+                        <span id="serialNumber" class="value">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label" data-i18n="firmware_version">Версия прошивки:</span>
+                        <span id="firmwareVersion" class="value">-</span>
+                    </div>
+                </div>
+                <div class="auto-connect-status">
+                    <span class="connect-indicator disconnected"></span>
+                    <span id="connectStatusText" data-i18n="device_not_found">Устройство не найдено</span>
+                </div>
+                <div class="button-group" style="margin-top: 12px;">
+                    <button type="button" id="btnConnect" class="btn btn-primary" data-i18n="connect">Подключить</button>
+                    <button type="button" id="btnDisconnect" class="btn btn-secondary" data-i18n="disconnect" disabled>Отключить</button>
+                </div>
+            </section>
+
+            <!-- Панель настроек -->
+            <section class="panel settings-panel">
+                <h2 data-i18n="settings_title">Настройки SETS2</h2>
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label for="ssbChannel" data-i18n="ssb_channel">SSB канал:</label>
+                        <select id="ssbChannel" class="form-control">
+                            <option value="0">#1 — 32768 Hz, LSB</option>
+                            <option value="1">#2 — 32768 Hz, HSB</option>
+                            <option value="2">#3 — 31250 Hz, LSB</option>
+                            <option value="3">#4 — 31250 Hz, HSB</option>
+                            <option value="4">#5 — 28500 Hz, LSB</option>
+                            <option value="5">#6 — 28500 Hz, HSB</option>
+                            <option value="6">#7 — 25000 Hz, LSB</option>
+                            <option value="7">#8 — 25000 Hz, HSB</option>
+                            <option value="16" data-i18n="channel_invalid">Не выбран</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="headphoneVolume" data-i18n="headphone_volume">Громкость эффектов:</label>
+                        <div class="range-group">
+                            <input type="range" id="headphoneVolume" min="0" max="100" value="100" class="form-range">
+                            <span id="headphoneVolumeValue" class="range-value">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vadSensitivity" data-i18n="vad_sensitivity">Чувствительность VAD:</label>
+                        <div class="range-group">
+                            <input type="range" id="vadSensitivity" min="0" max="100" value="100" class="form-range">
+                            <span id="vadSensitivityValue" class="range-value">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lowBatteryThreshold" data-i18n="low_battery_threshold">Порог низкого заряда (В):</label>
+                        <input type="number" id="lowBatteryThreshold" min="4.0" max="20.0" step="0.1" value="12.0" class="form-control">
+                        <span class="validation-hint" data-i18n="voltage_range">4.0 – 20.0 V</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="isRWLT">
+                            <span data-i18n="rwlt_mode">Режим RWLT</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="rwltGroup" style="display:none;">
+                        <label for="rwltDiverId" data-i18n="rwlt_diver_id">ID водолаза RWLT:</label>
+                        <input type="number" id="rwltDiverId" min="0" max="255" value="0" class="form-control">
+                        <span class="validation-hint" data-i18n="diver_id_range">0 – 255</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="flags_title">Флаги (Flags1):</label>
+                        <div class="flags-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag0" data-bit="0">
+                                <span data-i18n="flag0">Бит 0</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag1" data-bit="1">
+                                <span data-i18n="flag1">Бит 1</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag2" data-bit="2">
+                                <span data-i18n="flag2">Бит 2</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag3" data-bit="3">
+                                <span data-i18n="flag3">Бит 3</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag4" data-bit="4">
+                                <span data-i18n="flag4">Бит 4</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag5" data-bit="5">
+                                <span data-i18n="flag5">Бит 5</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag6" data-bit="6">
+                                <span data-i18n="flag6">Бит 6</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="flag7" data-bit="7">
+                                <span data-i18n="flag7">Бит 7</span>
+                            </label>
+                        </div>
+                        <div class="flags-value">
+                            <span data-i18n="flags_hex_value">Значение (hex):</span>
+                            <span id="flagsHexValue" class="hex-value">0x00</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="flashWrite">
+                            <span data-i18n="flash_write">Записать во flash</span>
+                        </label>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" id="btnReadSettings" class="btn btn-secondary" data-requires-device="true" data-i18n="read_settings" disabled>Прочитать настройки</button>
+                        <button type="button" id="btnSaveSettings" class="btn btn-primary" data-requires-device="true" data-i18n="save_settings" disabled>Сохранить настройки</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Лог обмена -->
+            <section class="panel log-panel">
+                <h2 data-i18n="log_title">Лог обмена</h2>
+                <div id="logContainer" class="log-container">
+                    <div class="log-entry">Готов к работе...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/ucnl/RedPhoneDXConfig" target="_blank" rel="noopener" class="footer-link">
+                    ⭐ GitHub
+                </a>
+                <a href="https://docs.unavlab.com/underwater_wireless_voice_systems_ru.html" target="_blank" rel="noopener" class="footer-link">
+                    📖 Docs
+                </a>
+                <a href="https://github.com/ucnl/RedPhoneDXConfig/blob/main/LICENSE" target="_blank" rel="noopener" class="footer-link">
+                    ⚖️ GNU GPL v3.0 License
+                </a>
+            </div>
+            <div class="footer-info">
+                <span class="footer-copy">&copy; 2026 <span data-i18n="org_name">(C) UC&NL</span></span>
+                <span class="footer-desc" data-i18n="footer_desc">Open Source Configuration Tool</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- NMEA + Serial + RPHPort -->
+    <script src="rph-nmea.js"></script>
+    <script src="serial-bridge.js"></script>
+    <script src="rph-port.js"></script>
+    <!-- App -->
+    <script src="i18n.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
