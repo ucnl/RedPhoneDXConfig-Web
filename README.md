@@ -1,6 +1,6 @@
 # 🤿 RedPhone DX Config — Web Edition
 
-Браузерный конфигуратор для [RedPhone DX](https://docs.unavlab.com/underwater_wireless_voice_systems_ru.html) — устройства подводной голосовой связи.
+Браузерный конфигуратор для [RedPhone DX](https://docs.unavlab.com/documentation/RU/RedPhone/RedPhone_DX_Specification_ru.html) — устройства подводной беспроводной голосовой связи.
 
 **Работает прямо в браузере. Установка не требуется.**
 
@@ -30,7 +30,7 @@
 
 ## Связанные проекты
 - [Десктопный конфигуратор (C#)](https://github.com/ucnl/RedPhoneDXConfig)
-- [Документация RedPhone DX](https://docs.unavlab.com/underwater_wireless_voice_systems_ru.html)
+- [Документация RedPhone DX](https://docs.unavlab.com/documentation/RU/RedPhone/RedPhone_DX_Specification_ru.html)
 
 ## Лицензия
 GNU GPL v3.0 © [UC&NL](https://github.com/ucnl)
