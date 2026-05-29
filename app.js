@@ -11,9 +11,14 @@ class DeviceConfig {
         this._initAllListeners();
         this.updateUI();
         this.setDefaultFlags();
+		this._initFlashWriteDefault();
         this._initLogToggle();
         this._initLangSwitch();
     }
+
+	_initFlashWriteDefault() {
+		document.getElementById('flashWrite').checked = true;
+	}
 
     // ==================== RPH Events ====================
 
@@ -222,7 +227,7 @@ class DeviceConfig {
         document.getElementById('isRWLT').checked = data.isRWLT ?? false;
         document.getElementById('rwltGroup').style.display = data.isRWLT ? 'block' : 'none';
         document.getElementById('rwltDiverId').value = data.rwltDiverId ?? 0;
-        document.getElementById('flashWrite').checked = data.flashWrite ?? false;
+        //document.getElementById('flashWrite').checked = data.flashWrite ?? false;
         this.setFlagsFromValue(data.flags1 ?? 0);
     }
 

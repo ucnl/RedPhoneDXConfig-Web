@@ -37,14 +37,14 @@ const I18n = {
 
             // Flags
             flags_title: 'Флаги (Flags1):',
-            flag0: 'Бит 0',
+            flag0: 'Игнорировать номер канала',
             flag1: 'Бит 1',
             flag2: 'Бит 2',
             flag3: 'Бит 3',
             flag4: 'Бит 4',
             flag5: 'Бит 5',
             flag6: 'Бит 6',
-            flag7: 'Бит 7',
+            flag7: 'Индикатор канала',
             flags_hex_value: 'Значение (hex):',
 
             // Device types
@@ -107,14 +107,14 @@ const I18n = {
 
             // Flags
             flags_title: 'Flags (Flags1):',
-            flag0: 'Bit 0',
+            flag0: 'PinsPrevail',
             flag1: 'Bit 1',
             flag2: 'Bit 2',
             flag3: 'Bit 3',
             flag4: 'Bit 4',
             flag5: 'Bit 5',
             flag6: 'Bit 6',
-            flag7: 'Bit 7',
+            flag7: 'CH Indicator',
             flags_hex_value: 'Value (hex):',
 
             // Device types
