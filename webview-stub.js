@@ -112,33 +112,44 @@
     };
 
     // ========== Перехват скачивания файлов для Android ==========
-    document.addEventListener('click', function(e) {
-        var link = e.target.closest('a[download]');
-        if (!link || !link.href || !link.href.startsWith('blob:')) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        var filename = link.getAttribute('download') || 'file.txt';
-        
-        fetch(link.href)
-            .then(function(response) { return response.blob(); })
-            .then(function(blob) {
-                var reader = new FileReader();
-                reader.onload = function() {
-                    var base64 = reader.result.split(',')[1]; // убираем data:*;base64,
-                    var iframe = document.createElement('iframe');
-                    iframe.style.display = 'none';
-                    iframe.src = 'file://save?' + encodeURIComponent(filename + '|' + base64);
-                    document.body.appendChild(iframe);
-                    setTimeout(function() { document.body.removeChild(iframe); }, 100);
-                };
-                reader.readAsDataURL(blob);
-            })
-            .catch(function(err) {
-                console.log('[Stub] Download error:', err);
-            });
-    }, true);
+	// Перехватываем HTMLAnchorElement.prototype.click
+	(function() {
+		var originalClick = HTMLAnchorElement.prototype.click;
+		var blobUrls = new Map();
+		var originalCreateObjectURL = URL.createObjectURL;
+		
+		URL.createObjectURL = function(blob) {
+			var url = originalCreateObjectURL.call(URL, blob);
+			blobUrls.set(url, blob);
+			return url;
+		};
+		
+		HTMLAnchorElement.prototype.click = function() {
+			if (this.download && this.href && this.href.startsWith('blob:')) {
+				console.log('[Stub] Intercepted click(): ' + this.download);
+				
+				var filename = this.download;
+				var blob = blobUrls.get(this.href);
+				
+				if (blob) {
+					var reader = new FileReader();
+					reader.onload = function() {
+						var base64 = reader.result.split(',')[1];
+						var iframe = document.createElement('iframe');
+						iframe.style.display = 'none';
+						iframe.src = 'app://savefile?' + encodeURIComponent(filename + '|' + base64);
+						document.body.appendChild(iframe);
+						setTimeout(function() { document.body.removeChild(iframe); }, 100);
+					};
+					reader.readAsDataURL(blob);
+				}
+				return;
+			}
+			return originalClick.call(this);
+		};
+		
+		console.log('[Stub] HTMLAnchorElement.click() interceptor registered');
+	})();
     // =============================================================
 
     console.log('[Stub] Universal Web Serial stub loaded (' + MAX_PORTS + ' ports)');
