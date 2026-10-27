@@ -66,6 +66,14 @@
                             <option value="16" data-i18n="channel_invalid">Не выбран</option>
                         </select>
                     </div>
+					
+					<div class="form-group">
+						<label for="voiceVolume" data-i18n="voice_volume">Общая громкость:</label>
+						<div class="range-group">
+							<input type="range" id="voiceVolume" min="0" max="100" value="100" class="form-range">
+							<span id="voiceVolumeValue" class="range-value">100%</span>
+						</div>
+					</div>
 
                     <div class="form-group">
                         <label for="headphoneVolume" data-i18n="headphone_volume">Громкость эффектов:</label>

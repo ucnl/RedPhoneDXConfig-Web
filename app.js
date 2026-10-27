@@ -100,6 +100,9 @@ class DeviceConfig {
         document.getElementById('btnDisconnect').addEventListener('click', () => this._disconnect());
 
         // Sliders
+		document.getElementById('voiceVolume').addEventListener('input', (e) => {
+			document.getElementById('voiceVolumeValue').textContent = e.target.value + '%';
+		});
         document.getElementById('headphoneVolume').addEventListener('input', (e) => {
             document.getElementById('headphoneVolumeValue').textContent = e.target.value + '%';
         });
@@ -219,8 +222,11 @@ class DeviceConfig {
     handleSettings(data) {
         const channelId = (data.ssbChannelId != null && data.ssbChannelId !== 16) ? data.ssbChannelId : 16;
         document.getElementById('ssbChannel').value = channelId;
-        document.getElementById('headphoneVolume').value = data.headphoneOutVolume ?? 100;
-        document.getElementById('headphoneVolumeValue').textContent = (data.headphoneOutVolume ?? 100) + '%';
+		const vols = this._unpackVolumes(data.headphoneOutVolume ?? 0xFF);
+		document.getElementById('voiceVolume').value = vols.voicePct;
+		document.getElementById('voiceVolumeValue').textContent = vols.voicePct + '%';
+		document.getElementById('headphoneVolume').value = vols.effectsPct;
+		document.getElementById('headphoneVolumeValue').textContent = vols.effectsPct + '%';
         document.getElementById('vadSensitivity').value = data.vadSensitivity ?? 100;
         document.getElementById('vadSensitivityValue').textContent = (data.vadSensitivity ?? 100) + '%';
         document.getElementById('lowBatteryThreshold').value = data.lowBatteryThresholdV ?? 12.0;
@@ -251,7 +257,10 @@ class DeviceConfig {
         const settings = {
             flashWrite: document.getElementById('flashWrite').checked,
             ssbChannelId: parseInt(document.getElementById('ssbChannel').value),
-            headphoneOutVolume: parseInt(document.getElementById('headphoneVolume').value),
+            headphoneOutVolume: this._packVolumes(
+				parseInt(document.getElementById('voiceVolume').value),
+				parseInt(document.getElementById('headphoneVolume').value)
+			),
             vadSensitivity: parseInt(document.getElementById('vadSensitivity').value),
             lowBatteryThresholdV: parseFloat(document.getElementById('lowBatteryThreshold').value),
             isRWLT: document.getElementById('isRWLT').checked,
@@ -263,6 +272,31 @@ class DeviceConfig {
     }
 
     // ==================== UI Helpers ====================
+
+	// 0–100% <-> 0–15 nibble
+	_pctToNibble(pct) {
+		const v = Math.max(0, Math.min(100, Number(pct) || 0));
+		return Math.round(v / 100 * 15) & 0x0F;
+	}
+
+	_nibbleToPct(nib) {
+		const v = Math.max(0, Math.min(15, Number(nib) || 0));
+		return Math.round(v / 15 * 100);
+	}
+
+	// Байт SETS2: старший ниббл — голос, младший — эффекты
+	_packVolumes(voicePct, effectsPct) {
+		return ((this._pctToNibble(voicePct) << 4) | this._pctToNibble(effectsPct)) & 0xFF;
+	}
+
+	_unpackVolumes(byte) {
+		const b = (Number(byte) || 0) & 0xFF;
+		return {
+			voicePct:   this._nibbleToPct((b >> 4) & 0x0F),
+			effectsPct: this._nibbleToPct(b & 0x0F)
+		};
+	}
+
 
     updateConnectionStatus(status) {
         const badge = document.getElementById('connectionStatus');
