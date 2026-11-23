@@ -169,15 +169,18 @@ const NMEA = {
     // Query SETS2 write with specific params
     buildQuerySETS2Write(settings) {
         const s = settings || {};
+        const num = (v, fb = null) =>
+            (v !== null && v !== undefined && !Number.isNaN(Number(v))) ? Number(v) : fb;
+        const vol = num(s.headphoneOutVolume, null);
         return NMEA.buildRPH(NMEA.SID.SETS2, [
             s.flashWrite !== undefined ? (s.flashWrite ? 1 : 0) : null,
-            (s.ssbChannelId !== undefined && s.ssbChannelId !== 16) ? s.ssbChannelId : null,
-            s.headphoneOutVolume !== undefined ? s.headphoneOutVolume : null,
-            s.vadSensitivity !== undefined ? s.vadSensitivity : null,
-            s.lowBatteryThresholdV !== undefined ? s.lowBatteryThresholdV : null,
+            (s.ssbChannelId !== undefined && s.ssbChannelId !== 16) ? num(s.ssbChannelId, null) : null,
+            vol !== null ? (vol & 0xFF) : null,
+            num(s.vadSensitivity, null),
+            num(s.lowBatteryThresholdV, null),
             s.isRWLT !== undefined ? (s.isRWLT ? 1 : 0) : null,
-            s.rwltDiverId !== undefined ? s.rwltDiverId : null,
-            s.flags1 !== undefined ? s.flags1 : null,
+            num(s.rwltDiverId, null),
+            num(s.flags1, null),
             null, // res1
             null  // res2
         ]);

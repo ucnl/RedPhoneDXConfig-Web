@@ -70,7 +70,7 @@
 					<div class="form-group">
 						<label for="voiceVolume" data-i18n="voice_volume">Общая громкость:</label>
 						<div class="range-group">
-							<input type="range" id="voiceVolume" min="0" max="100" value="100" class="form-range">
+							<input type="range" id="voiceVolume" min="0" max="100" step="1" value="100" class="form-range">
 							<span id="voiceVolumeValue" class="range-value">100%</span>
 						</div>
 					</div>
@@ -78,7 +78,7 @@
                     <div class="form-group">
                         <label for="headphoneVolume" data-i18n="headphone_volume">Громкость эффектов:</label>
                         <div class="range-group">
-                            <input type="range" id="headphoneVolume" min="0" max="100" value="100" class="form-range">
+                            <input type="range" id="headphoneVolume" min="0" max="100" step="1" value="100" class="form-range">
                             <span id="headphoneVolumeValue" class="range-value">100%</span>
                         </div>
                     </div>
@@ -86,7 +86,7 @@
                     <div class="form-group">
                         <label for="vadSensitivity" data-i18n="vad_sensitivity">Чувствительность VAD:</label>
                         <div class="range-group">
-                            <input type="range" id="vadSensitivity" min="0" max="100" value="100" class="form-range">
+                            <input type="range" id="vadSensitivity" min="0" max="100" step="1" value="100" class="form-range">
                             <span id="vadSensitivityValue" class="range-value">100%</span>
                         </div>
                     </div>
@@ -119,7 +119,7 @@
                             </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" id="flag1" data-bit="1">
-                                <span data-i18n="flag1">Бит 1</span>
+                                <span data-i18n="flag1">PTT Режим морзе</span>
                             </label>
                             <label class="checkbox-label">
                                 <input type="checkbox" id="flag2" data-bit="2">

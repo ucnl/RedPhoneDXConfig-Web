@@ -35,10 +35,10 @@ class RPHPort {
         try {
             await this.serial.open(baudRate);
             await this.serial.sendRaw(new Uint8Array([0x00, 0x00, 0x00]));
-            this.queryDINFO();
-            this._startTimer(this.defaultTimeoutMs);
+            await this.queryDINFO();   // _trySend запустит таймер сам
         } catch (err) {
             this._log('error', err.message);
+            if (this.onStatusChanged) this.onStatusChanged();
             throw err;
         } finally {
             this.connecting = false;
@@ -75,24 +75,24 @@ class RPHPort {
     onStatusChanged = null;
     onLog = null;
 
-    _trySend(message, queryID) {
+        async _trySend(message, queryID) {
         if (this.isWaitingLocal) return false;
         try {
-            this.serial.send(message);
+            await this.serial.send(message);
             this._log('info', `<< ${message.trim()}`);
             const timeout = (queryID === 'SETS') ? this.setsTimeoutMs : this.defaultTimeoutMs;
-            this._startTimer(timeout);
             this.isWaitingLocal = true;
             this.lastQueryID = queryID;
+            this._startTimer(timeout);
             return true;
         } catch (err) {
             this._log('error', `Send error: ${err.message}`);
+            this.isWaitingLocal = false;
             return false;
         }
     }
 
     _onNMEAMessage(rawLine) {
-        this._resetTimer();
         this._log('info', `>> ${rawLine.trim()}`);
 
         const parsed = NMEA.parse(rawLine);
@@ -101,6 +101,8 @@ class RPHPort {
             return;
         }
         if (parsed.manufacturer !== NMEA.MC_RPH) return;
+
+        this._resetTimer();   // только после валидации RPH-строки
 
         if (!this.detected && ['0','1','2','3','!','?'].includes(parsed.sentenceId)) {
             this.detected = true;
@@ -234,11 +236,15 @@ class RPHPort {
         this.timerCnt++;
         if (this.timerCnt >= this.timerCntMax) {
             this._stopTimer();
+            const wasWaiting = this.isWaitingLocal;
+            this.isWaitingLocal = false;
             if (this.detected) {
                 this._log('warning', 'Device timeout');
                 this.detected = false;
-                if (this.onStatusChanged) this.onStatusChanged();
+            } else if (wasWaiting) {
+                this._log('warning', 'No response from device (timeout)');
             }
+            if (this.onStatusChanged) this.onStatusChanged();
         }
     }
 

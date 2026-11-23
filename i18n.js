@@ -39,7 +39,7 @@ const I18n = {
             // Flags
             flags_title: 'Флаги (Flags1):',
             flag0: 'Игнорировать номер канала',
-            flag1: 'Бит 1',
+            flag1: 'PTT Режим Морзе',
             flag2: 'Бит 2',
             flag3: 'Бит 3',
             flag4: 'Бит 4',
@@ -109,8 +109,8 @@ const I18n = {
 
             // Flags
             flags_title: 'Flags (Flags1):',
-            flag0: 'PinsPrevail',
-            flag1: 'Bit 1',
+            flag0: 'Pins prevail',
+            flag1: 'PTT Morse mode',
             flag2: 'Bit 2',
             flag3: 'Bit 3',
             flag4: 'Bit 4',

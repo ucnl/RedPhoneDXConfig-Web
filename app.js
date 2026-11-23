@@ -37,7 +37,7 @@ class DeviceConfig {
 
            // Авто-запрос настроек после обнаружения устройства
            if (this.deviceInfo.isValid) {
-               setTimeout(() => this.rph.querySETS2Read(), 300);
+               setTimeout(() => { this.rph.querySETS2Read().catch(() => {}); }, 300);
     }
         };
 
@@ -49,7 +49,9 @@ class DeviceConfig {
         this.rph.onACKReceived = (cmdId, resultId) => {
             if (resultId === 0) {
                 this.addLog(I18n.translate('log_settings_saved'), 'success');
-                setTimeout(() => { if (this.rph.detected) this.rph.querySETS2Read(); }, 500);
+				setTimeout(() => {
+                    if (this.rph.detected) this.rph.querySETS2Read().catch(() => {});
+                }, 500);
             } else {
                 this.addLog(`${I18n.translate('log_error')}${resultId}`, 'error');
             }
@@ -175,18 +177,29 @@ class DeviceConfig {
         try {
             await this.rph.connect(9600);
         } catch (err) {
-            this.addLog(I18n.translate('log_error') + err.message, 'error');
-            btn.disabled = false;
+            this.addLog(I18n.translate('log_error') + (err?.message || err), 'error');
+        } finally {
+            const connected = this.rph.detected;
+            const portOpen = this.rph.serial && this.rph.serial.isOpen;
+            this._setConnectButtons(connected || portOpen);
             btn.textContent = I18n.translate('connect');
+            if (!connected && !portOpen) {
+                btn.disabled = false;
+            }
         }
     }
 
     async _disconnect() {
-        await this.rph.disconnect();
-        this.deviceInfo = null;
-        this._setConnectButtons(false);
-        this._clearDeviceInfo();
-        this.updateUI();
+        try {
+            await this.rph.disconnect();
+        } catch (err) {
+            this.addLog(I18n.translate('log_error') + (err?.message || err), 'error');
+        } finally {
+            this.deviceInfo = null;
+            this._clearDeviceInfo();
+            this._setConnectButtons(false);
+            this.updateUI();
+        }
     }
 
     _setConnectButtons(connected) {
@@ -244,7 +257,9 @@ class DeviceConfig {
             this.addLog(I18n.translate('device_not_found'), 'error');
             return;
         }
-        this.rph.querySETS2Read();
+        this.rph.querySETS2Read().catch((err) => {
+            this.addLog(I18n.translate('log_error') + (err?.message || err), 'error');
+        });
     }
 
     saveSettings() {
@@ -254,17 +269,25 @@ class DeviceConfig {
         }
         if (!this._validateForm()) return;
 
+        // Нормализуем громкости к представимым значениям и синхронизируем слайдеры
+        const voicePct   = this._normalizePct(parseInt(document.getElementById('voiceVolume').value));
+        const effectsPct = this._normalizePct(parseInt(document.getElementById('headphoneVolume').value));
+
+        document.getElementById('voiceVolume').value = voicePct;
+        document.getElementById('voiceVolumeValue').textContent = voicePct + '%';
+        document.getElementById('headphoneVolume').value = effectsPct;
+        document.getElementById('headphoneVolumeValue').textContent = effectsPct + '%';
+
+        const rwltIdRaw = parseInt(document.getElementById('rwltDiverId').value);
+
         const settings = {
             flashWrite: document.getElementById('flashWrite').checked,
             ssbChannelId: parseInt(document.getElementById('ssbChannel').value),
-            headphoneOutVolume: this._packVolumes(
-				parseInt(document.getElementById('voiceVolume').value),
-				parseInt(document.getElementById('headphoneVolume').value)
-			),
+            headphoneOutVolume: this._packVolumes(voicePct, effectsPct),
             vadSensitivity: parseInt(document.getElementById('vadSensitivity').value),
             lowBatteryThresholdV: parseFloat(document.getElementById('lowBatteryThreshold').value),
             isRWLT: document.getElementById('isRWLT').checked,
-            rwltDiverId: parseInt(document.getElementById('rwltDiverId').value),
+            rwltDiverId: Number.isNaN(rwltIdRaw) ? 0 : rwltIdRaw,
             flags1: this.getFlagsValue()
         };
 
@@ -274,14 +297,20 @@ class DeviceConfig {
     // ==================== UI Helpers ====================
 
 	// 0–100% <-> 0–15 nibble
+	// 0–100% <-> 0–15 nibble
 	_pctToNibble(pct) {
 		const v = Math.max(0, Math.min(100, Number(pct) || 0));
-		return Math.round(v / 100 * 15) & 0x0F;
+		return Math.min(15, Math.round(v / 100 * 15));
 	}
 
 	_nibbleToPct(nib) {
 		const v = Math.max(0, Math.min(15, Number(nib) || 0));
 		return Math.round(v / 15 * 100);
+	}
+
+	// Нормализация процента к представимому значению (туда-обратно)
+	_normalizePct(pct) {
+		return this._nibbleToPct(this._pctToNibble(pct));
 	}
 
 	// Байт SETS2: старший ниббл — голос, младший — эффекты
